@@ -13,6 +13,8 @@ import 'package:mockito/mockito.dart';
 
 import 'package:counterbloc/main.dart';
 
+class MockCounterService extends Mock implements CounterService {}
+
 void main() {
   group('CounterBloc', (){
     blocTest('Initialize',
@@ -27,6 +29,16 @@ void main() {
         return CounterBloc(CounterService(0));
       } ,
         act:(counterBloc) => counterBloc.add(CounterEvent.increment),
+      expect: [isA<CounterLoadInProgress>(),CounterLoadingSuccess(1)],
+    );
+    blocTest('Emits CounterLoadInProgress(), CounterLoadSuccess(1) when CounterEvent.increnment is added',
+        build: () async {
+          final counterService = MockCounterService();
+          when(counterService.increment()).thenAnswer((_) => Future.value(1));
+
+          return CounterBloc(counterService);
+        },
+      act:(counterBloc) => counterBloc.add(CounterEvent.increment),
       expect: [isA<CounterLoadInProgress>(),CounterLoadingSuccess(1)],
     );
   });
